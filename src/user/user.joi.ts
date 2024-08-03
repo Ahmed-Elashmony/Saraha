@@ -35,3 +35,21 @@ export const updateSchema = {
     })
     .required(),
 };
+
+export const forgetSchema = {
+  body: joi
+    .object({
+      email: joi.string().email().required(),
+    })
+    .required(),
+};
+
+export const resetSchema = {
+  body: joi
+    .object({
+      password: joi.string().required(),
+      cPassword: joi.string().valid(joi.ref('password')).required(),
+      code: joi.string().length(5).required(),
+    })
+    .required(),
+};

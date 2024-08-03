@@ -26,6 +26,9 @@ export class User {
   @Prop()
   activationCode: string;
 
+  @Prop()
+  forgetCode: string;
+
   @Prop({ default: false })
   online: boolean;
 

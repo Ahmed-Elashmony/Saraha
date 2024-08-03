@@ -12,7 +12,13 @@ import {
 } from '@nestjs/common';
 import { AuthenticationGuard } from 'src/guards/authentication/authentication.guard';
 import { JoivalidationPipe } from 'src/pipes/joivalidation/joivalidation.pipe';
-import { signInSchema, signUpSchema, updateSchema } from './user.joi';
+import {
+  forgetSchema,
+  resetSchema,
+  signInSchema,
+  signUpSchema,
+  updateSchema,
+} from './user.joi';
 import { UserService } from './user.service';
 
 @Controller('user') // APP.USE(USER)
@@ -48,5 +54,17 @@ export class UserController {
   @UsePipes(new JoivalidationPipe(updateSchema))
   updateProfile(@Body() body: any, @Req() req: Request) {
     return this._userSerives.updateProfile(body, req);
+  }
+
+  @Patch('forget-password/:email')
+  @UsePipes(new JoivalidationPipe(forgetSchema))
+  forgetPass(@Param() param: object) {
+    return this._userSerives.forgetPass(param);
+  }
+
+  @Patch('rest-password')
+  @UsePipes(new JoivalidationPipe(resetSchema))
+  resetPass(@Body() body: any) {
+    return this._userSerives.resetPass(body);
   }
 }

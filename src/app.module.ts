@@ -3,6 +3,7 @@ import { ConfigModule } from '@nestjs/config';
 import { MongooseModule } from '@nestjs/mongoose';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
+import { MessageModule } from './message/message.module';
 import { UserModule } from './user/user.module';
 import { SendEmail } from './utils/sendEmail/sendEmail';
 import { SendEmailModule } from './utils/sendEmail/sendEmail.module';
@@ -14,6 +15,7 @@ import { SendEmailModule } from './utils/sendEmail/sendEmail.module';
     forwardRef(() => UserModule),
     forwardRef(() => SendEmailModule),
     ConfigModule.forRoot({ envFilePath: '.env', isGlobal: true }),
+    MessageModule,
   ],
   controllers: [AppController],
   providers: [AppService, SendEmail],

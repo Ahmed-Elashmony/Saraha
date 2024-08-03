@@ -11,5 +11,6 @@ import { UserService } from './user.service';
   imports: [userDBModule, forwardRef(() => SendEmailModule)],
   controllers: [UserController],
   providers: [UserService, JwtService, UserdbService, SendEmail],
+  exports: [UserdbService],
 })
 export class UserModule {}

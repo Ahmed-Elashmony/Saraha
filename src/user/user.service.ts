@@ -67,10 +67,7 @@ export class UserService {
   }
 
   async singIn(body: any, res: Response): Promise<object> {
-    const user = await this._userModel.findOneAndUpdate(
-      { email: body.email },
-      { online: true },
-    );
+    const user = await this._userModel.findOne({ email: body.email });
     if (!user.IsConfirm) {
       throw new BadRequestException('Confirm Your Email First');
     }
@@ -81,6 +78,8 @@ export class UserService {
     if (!match) {
       throw new BadRequestException('Wrong Password');
     }
+
+    delete user.password;
 
     const token = this._jwtService.sign(
       { id: user['_id'], email: user.email },
@@ -98,5 +97,29 @@ export class UserService {
   async updateProfile(body: any, req: any): Promise<object> {
     const user = await this._userModel.findByIdAndUpdate(req.user._id, body);
     return { message: 'Done', user };
+  }
+
+  async forgetPass(param: any): Promise<object> {
+    const code = Math.floor(Math.random() * 1000000 + 1);
+    console.log(code);
+
+    await this._userModel.findOneAndUpdate(
+      { email: param.email },
+      { $set: { forgetCode: code } },
+    );
+
+    return { message: 'Done', code };
+  }
+
+  async resetPass(body: any): Promise<object> {
+    const hashPass = await bcrypt.hash(body.password, 8);
+    const user = await this._userModel.findOneAndUpdate(
+      { forgetCode: body.code },
+      { password: hashPass, $unset: { forgetCode: 1 } },
+    );
+    if (!user) {
+      throw new BadRequestException('WRONG CODE');
+    }
+    return { message: 'Done' };
   }
 }
