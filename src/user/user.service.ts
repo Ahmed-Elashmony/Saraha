@@ -6,9 +6,11 @@ import {
 } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcrypt';
+import * as crypto from 'crypto';
 import { Response } from 'express';
 import { UserdbService } from 'src/DB/User/userdb/userdb.service';
-import { SendEmail } from 'src/sendEmail';
+import { ConfirmTemp } from 'src/utils/htmlTemp/Temps';
+import { SendEmail } from 'src/utils/sendEmail/sendEmail';
 
 @Injectable()
 export class UserService {
@@ -27,23 +29,51 @@ export class UserService {
     if (checkE) {
       throw new ConflictException(`Email ${body.email} registed before`);
     }
+    const activationCode = crypto.randomBytes(64).toString('hex');
+
+    body.activationCode = activationCode;
     // hash password
     const hashPass = await bcrypt.hash(body.password, 8);
 
     body.password = hashPass;
-    const user = await this._userModel.create({ ...body });
+    await this._userModel.create({ ...body });
 
-    const text = 'Confirm Email';
+    const html = ConfirmTemp(
+      `http://localhost:3000/user/confirm-email/${activationCode}`,
+    );
     const receiver = body.email;
     const about = 'Confirm Your Email';
 
-    this.sendMail.sendMail(text, receiver, about);
+    await this.sendMail.sendMail(receiver, about, html);
 
-    return res.json({ message: 'Done', user });
+    return res.json({ message: 'Please Confirm Email, Check Your Gmail' });
+  }
+
+  async confimEmail(param: any, res: Response): Promise<any> {
+    if (!param) {
+      return res.redirect('http://localhost:3000/');
+    }
+
+    await this._userModel.findOneAndUpdate(
+      {
+        activationCode: param,
+      },
+      {
+        IsConfirm: true,
+        $unset: { activationCode: 1 },
+      },
+    );
+    return res.json({ message: 'Confirmed Succssfly' });
   }
 
   async singIn(body: any, res: Response): Promise<object> {
-    const user = await this._userModel.findOne({ email: body.email });
+    const user = await this._userModel.findOneAndUpdate(
+      { email: body.email },
+      { online: true },
+    );
+    if (!user.IsConfirm) {
+      throw new BadRequestException('Confirm Your Email First');
+    }
     if (!user) {
       throw new NotFoundException('this email doesnt exists');
     }
@@ -65,8 +95,8 @@ export class UserService {
     return { message: 'Done', user };
   }
 
-  async updateProfile(body: any): Promise<object> {
-    const user = await this._userModel.findByIdAndUpdate(body);
+  async updateProfile(body: any, req: any): Promise<object> {
+    const user = await this._userModel.findByIdAndUpdate(req.user._id, body);
     return { message: 'Done', user };
   }
 }

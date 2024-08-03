@@ -2,6 +2,7 @@ import {
   Body,
   Controller,
   Get,
+  Param,
   Patch,
   Post,
   Req,
@@ -9,7 +10,6 @@ import {
   UseGuards,
   UsePipes,
 } from '@nestjs/common';
-import { Request, Response } from 'express';
 import { AuthenticationGuard } from 'src/guards/authentication/authentication.guard';
 import { JoivalidationPipe } from 'src/pipes/joivalidation/joivalidation.pipe';
 import { signInSchema, signUpSchema, updateSchema } from './user.joi';
@@ -25,9 +25,14 @@ export class UserController {
     return this._userSerives.signUp(body, res);
   }
 
+  @Get('confirm-email/:code')
+  confirmEmail(@Param() param: any, @Res() res: any): object {
+    return this._userSerives.confimEmail(param.code, res);
+  }
+
   @Post('sign-in')
   @UsePipes(new JoivalidationPipe(signInSchema))
-  singIn(@Body() body: any, @Res() res: Response): object {
+  singIn(@Body() body: any, @Res() res: any): object {
     // generate token
     return this._userSerives.singIn(body, res);
   }
@@ -41,7 +46,7 @@ export class UserController {
   @Patch()
   @UseGuards(AuthenticationGuard)
   @UsePipes(new JoivalidationPipe(updateSchema))
-  updateProfile(@Body() body: any) {
-    return this._userSerives.updateProfile(body);
+  updateProfile(@Body() body: any, @Req() req: Request) {
+    return this._userSerives.updateProfile(body, req);
   }
 }

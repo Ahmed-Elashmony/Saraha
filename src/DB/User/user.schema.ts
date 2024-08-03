@@ -16,6 +16,21 @@ export class User {
 
   @Prop({ enum: ['male', 'female'] })
   gender: string;
+
+  @Prop()
+  age: number;
+
+  @Prop()
+  phone: string;
+
+  @Prop()
+  activationCode: string;
+
+  @Prop({ default: false })
+  online: boolean;
+
+  @Prop({ default: false })
+  deleted: boolean;
 }
 const userSchema = SchemaFactory.createForClass(User);
 export const userDBModule = MongooseModule.forFeature([

@@ -28,10 +28,10 @@ export const signInSchema = {
 export const updateSchema = {
   body: joi
     .object({
-      email: joi.string().email().required(),
-      password: joi.string().required(),
+      age: joi.number().max(100).min(4),
+      name: joi.string(),
+      gender: joi.string().valid('male', 'female'),
+      phone: joi.string(),
     })
     .required(),
 };
-
-

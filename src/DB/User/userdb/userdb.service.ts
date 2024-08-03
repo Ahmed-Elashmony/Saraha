@@ -15,7 +15,19 @@ export class UserdbService {
   async create(object: any): Promise<User> {
     return await this.userModel.create(object);
   }
-  async findByIdAndUpdate(object: any): Promise<User> {
-    return await this.userModel.findByIdAndUpdate(object)
+  async findByIdAndUpdate(object1: any, object2: any): Promise<User> {
+    return await this.userModel
+      .findByIdAndUpdate(object1, object2, {
+        new: true,
+      })
+      .select('-password');
+  }
+
+  async findOneAndUpdate(object1: any, object2: any): Promise<User> {
+    return await this.userModel
+      .findOneAndUpdate(object1, object2, {
+        new: true,
+      })
+      .select('-password');
   }
 }

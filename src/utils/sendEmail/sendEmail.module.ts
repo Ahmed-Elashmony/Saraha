@@ -1,16 +1,27 @@
 import { MailerModule } from '@nestjs-modules/mailer';
 import { Module } from '@nestjs/common';
+import * as dotenv from 'dotenv';
 import { SendEmail } from './sendEmail';
+dotenv.config();
 
 @Module({
   imports: [
     MailerModule.forRoot({
       transport: {
-        host: process.env.Email,
+        host: 'localhost',
+        port: 587,
+        secure: false,
+        service: 'gmail',
         auth: {
-          user: process.env.Email_UserName,
+          user: process.env.Email,
           pass: process.env.Email_Password,
         },
+        tls: {
+          rejectUnauthorized: false, // Use only for development/testing
+        },
+      },
+      defaults: {
+        from: '"No Reply" <no-reply@yourdomain.com>',
       },
     }),
   ],
